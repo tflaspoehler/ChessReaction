@@ -1,0 +1,62 @@
+:root {
+  --square-size: 3em;
+}
+
+.piece {
+  width: 100%;
+}
+
+.Game {
+  text-align: center;
+  align-content: center;
+  display: inline-block;
+  position: relative
+}
+.game_piece {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--square-size);
+  height: var(--square-size);
+  vertical-align: middle;
+  text-align: center;
+  margin: auto;
+}
+
+.game_piece img {width:100%;}
+
+.square  {
+  width:  var(--square-size);
+  height: var(--square-size);
+  outline: 2px solid black;
+  outline-offset: -1px;
+  display: table-cell;
+}
+.label  {
+  width:  var(--square-size);
+  height: var(--square-size);
+  display: table-cell;
+}
+.grave {
+  padding: 1px;
+  width: 10px;
+  height: 10px;
+  margin: auto;
+}
+.light {
+  background-color: #fff;
+}
+.dark  {
+  background-color: #acf;
+}
+
+.row {
+  display:table-row;
+  border-collapse: collapse;
+}
+
+.board {
+    display: table;
+    margin: auto;
+    border-collapse: collapse;
+}
