@@ -1,24 +1,20 @@
 import React, { Component } from 'react';
 import './App.css';
 import './board.css';
-import { pieces } from './pieces.js';
-import { Populate } from './pieces.js';
 import { Board } from './board.js';
-import { getPosition } from './position.js';
 
 class App extends Component {
   render() {
     return (
       <div className="App">
         <div className="App-header">
-          <h1 className="App-title">ChessReactions</h1>
+          <h1 className="App-title">ChessReaction</h1>
         </div>
         <p className="App-intro">
-          A small project to learn react by creating a way to use machine learning on an imported collection of lines analysis import squares for different pieces.
+          A small project to learn react.js within the context of chess. I would like to add simple features to move pieces around and import multiple PGNs for some data analysis using python libraries with this all being free online. This is partly inspired by using chessable to study openings for the first time, and wanting to do some analysis on my own.
         </p>
         <div className="Game">
         <Board />
-        <Populate />
         </div>
       </div>
     );

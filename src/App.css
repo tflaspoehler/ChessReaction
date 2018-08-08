@@ -25,7 +25,11 @@
 }
 
 .App-intro {
+  margin: auto;
+  text-align: justify;
   font-size: small;
+  max-width: 30em;
+  padding: 2em 0em;
 }
 
 @keyframes App-logo-spin {

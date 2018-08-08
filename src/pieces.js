@@ -12,50 +12,52 @@ import black_rook   from './images/black_rook.svg';
 import black_pawn   from './images/black_pawn.svg';
 
 import React, { Component } from 'react';
-import { Animate } from 'react-move';
-
 
 export class Piece extends Component {
 	constructor(props) {
-		super(props);
+        super(props);
+        let offset = 9-this.props.peace.row;
 		this.state ={
-			left: 0,
-			duration: 300
-		}
-	}
-	
+            key: this.props.key,
+            left: 'calc(3em*'+this.props.peace.column.toString()+')',
+            top: 'calc(('+offset.toString()+')*(3em)',
+            row: this.props.peace.row,
+            column: this.props.peace.column,
+            image: this.props.peace.image
+        }
+    }
+    
+    handleClick () {
+        this.setState({active:true})
+        this.props.onClick(this.props.key)
+    }
+
     render () {
-        let { left, duration } = this.state;
-        let offset = 9-this.props.peace.row
+        let offset = 9-this.state.row;
+        let back = '';
+        if (this.state.active) {
+            back = 'rgba(155, 0, 0, 0.25)'
+        }
+        else {
+            back = 'transparent'
+        }
+        
         return (
             <div
                 style={{top:  'calc(('+offset.toString()+')*(3em)',
-                        left: 'calc(3em*'+this.props.peace.column.toString()+')'}}
-                id={this.props.peace.name} class="game_piece" >
+                        left: 'calc(3em*'+this.state.column.toString()+')',
+                        backgroundColor: back}}
+                id={this.props.peace.name} class="game_piece" 
+                onClick={() => this.handleClick()} 
+            >
                 <img
-                    src={this.props.peace.image}
+                    src={this.state.image}
+                    alt={this.state.name}
                 />
             </div>
 		);
 	}
 }
-
-export class Populate extends Component {
-    create_pieces = () => {
-      let population = []
-      let offset = 0
-      for (let i = 0; i < pieces.length ; i++) {
-        offset = 9-pieces[i].row
-        population.push(
-                    <Piece peace={pieces[i]} />
-        )
-      }
-      return population
-    }
-    render (){
-      return this.create_pieces()
-    }
-  }
 
 var wK = {
     name: 'king',
