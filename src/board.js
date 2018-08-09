@@ -1,7 +1,35 @@
 import React, { Component } from 'react';
-import { pieces } from './pieces.js';
 import { Piece } from './pieces.js';
 import './App.css';
+import data from './pieces.json'
+
+import white_king   from './images/white_king.svg';
+import white_queen  from './images/white_queen.svg';
+import white_bishop from './images/white_bishop.svg';
+import white_knight from './images/white_knight.svg';
+import white_rook   from './images/white_rook.svg';
+import white_pawn   from './images/white_pawn.svg';
+import black_king   from './images/black_king.svg';
+import black_queen  from './images/black_queen.svg';
+import black_bishop from './images/black_bishop.svg';
+import black_knight from './images/black_knight.svg';
+import black_rook   from './images/black_rook.svg';
+import black_pawn   from './images/black_pawn.svg';
+
+var images = {
+    'white_king' : white_king,
+    'white_queen' : white_queen,
+    'white_bishop' : white_bishop,
+    'white_knight' : white_knight,
+    'white_rook' : white_rook,
+    'white_pawn' : white_pawn,
+    'black_king' : black_king,
+    'black_queen' : black_queen,
+    'black_bishop' : black_bishop,
+    'black_knight' : black_knight,
+    'black_rook' : black_rook,
+    'black_pawn' : black_pawn
+}
 
 export class Square extends Component {
   constructor(props) {
@@ -24,9 +52,14 @@ export class Square extends Component {
 export class Board extends Component {
   constructor(props) {
     super(props)
+    for (let i = 0; i < data.pieces.length; i++) {
+      data.pieces[i].image = images[data.pieces[i].image];
+      data.pieces[i].row = parseInt(data.pieces[i].row);
+      data.pieces[i].column = parseInt(data.pieces[i].column);
+    }
     this.state = {
       squares: Array(64).fill(null),
-      pieces: pieces,
+      pieces: data.pieces,
       active: null
     }
     this.active_piece = this.active_piece.bind(this);
@@ -45,7 +78,7 @@ export class Board extends Component {
   }
 
   create_pieces = () => {
-    let population = []
+    let population = [];
     for (let i = 0; i < this.state.pieces.length ; i++) {
       population.push(
                   <Piece 
@@ -83,6 +116,7 @@ export class Board extends Component {
           shade = "dark square"
         }
         row.push(<Square
+          key={(j*8)+i+1}
           shade={shade}
           row={i}
           column={j}

@@ -1,0 +1,323 @@
+{	
+	"pieces": [
+	{
+	"nickname": "wK",
+    "name": "king",
+    "color": "white",
+    "position": "h1",
+    "row": "1",
+    "column": "5",
+    "image": "white_king" 
+    },
+
+	{
+	"nickname": "wQ",
+    "name": "queen",
+    "color": "white",
+    "position": "d1",
+    "row": "1",
+    "column": "4",
+    "image": "white_queen"
+    },
+
+	{
+	"nickname": "wLB",
+    "name": "light-squared bishop",
+    "color": "white",
+    "position": "f1",
+    "row": "1",
+    "column": "6",
+    "image": "white_bishop"
+    },
+
+	{
+	"nickname": "wDB",
+    "name": "dark-squared bishop",
+    "color": "white",
+    "position": "c1",
+    "row": "1",
+    "column": "3",
+    "image": "white_bishop"
+    },
+
+	{
+	"nickname": "wLN",
+    "name": "light-squared knight",
+    "color": "white",
+    "position": "b1",
+    "row": "1",
+    "column": "2",
+    "image": "white_knight"
+    },
+
+	{
+	"nickname": "wDN",
+    "name": "dark-squared knight",
+    "color": "white",
+    "position": "g1",
+    "row": "1",
+    "column": "7",
+    "image": "white_knight"
+    },
+
+	{
+	"nickname": "wLR",
+    "name": "light-squared rook",
+    "color": "white",
+    "position": "h1",
+    "row": "1",
+    "column": "8",
+    "image": "white_rook"
+    },
+
+	{
+	"nickname": "wDR",
+    "name": "dark-squared rook",
+    "color": "white",
+    "position": "a1",
+    "row": "1",
+    "column": "1",
+    "image": "white_rook"
+    },
+
+	{
+	"nickname": "w1P",
+    "name": "1st pawn",
+    "color": "white",
+    "position": "a2",
+    "row": "2",
+    "column": "1",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w2P",
+    "name": "2nd pawn",
+    "color": "white",
+    "position": "b2",
+    "row": "2",
+    "column": "2",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w3P",
+    "name": "3rd pawn",
+    "color": "white",
+    "position": "c2",
+    "row": "2",
+    "column": "3",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w4P",
+    "name": "4th pawn",
+    "color": "white",
+    "position": "d2",
+    "row": "2",
+    "column": "4",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w5P",
+    "name": "5th pawn",
+    "color": "white",
+    "position": "e2",
+    "row": "2",
+    "column": "5",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w6P",
+    "name": "6th pawn",
+    "color": "white",
+    "position": "f2",
+    "row": "2",
+    "column": "6",
+    "image": "white_pawn"
+    
+	},
+
+	{
+	"nickname": "w7P",
+    "name": "7th pawn",
+    "color": "white",
+    "position": "g2",
+    "row": "2",
+    "column": "7",
+    "image": "white_pawn"
+	},
+
+	{
+	"nickname": "w8P",
+    "name": "8th pawn",
+    "color": "white",
+    "position": "h2",
+    "row": "2",
+    "column": "8",
+    "image": "white_pawn"
+	},
+	
+	{
+	"nickname": "bK",
+    "name": "king",
+    "color": "black",
+    "position": "h1",
+    "row": "8",
+    "column": "5",
+    "image": "black_king"
+	},
+
+	{
+	"nickname": "bQ",
+    "name": "queen",
+    "color": "black",
+    "position": "d1",
+    "row": "8",
+    "column": "4",
+    "image": "black_queen"
+	},
+
+	{
+	"nickname": "bLB",
+    "name": "light-squared bishop",
+    "color": "black",
+    "position": "c8",
+    "row": "8",
+    "column": "3",
+    "image": "black_bishop"
+	},
+
+	{
+	"nickname": "bDB",
+    "name": "dark-squared bishop",
+    "color": "black",
+    "position": "f1",
+    "row": "8",
+    "column": "6",
+    "image": "black_bishop"
+	},
+
+	{
+	"nickname": "bLN",
+    "name": "light-squared knight",
+    "color": "black",
+    "position": "b1",
+    "row": "8",
+    "column": "2",
+    "image": "black_knight"
+	},
+
+	{
+	"nickname": "bDN",
+    "name": "dark-squared knight",
+    "color": "black",
+    "position": "g1",
+    "row": "8",
+    "column": "7",
+    "image": "black_knight"
+	},
+
+	{
+	"nickname": "bLR",
+    "name": "light-squared rook",
+    "color": "black",
+    "position": "h1",
+    "row": "8",
+    "column": "8",
+    "image": "black_rook"
+	},
+
+	{
+	"nickname": "bDR",
+    "name": "dark-squared rook",
+    "color": "black",
+    "position": "a1",
+    "row": "8",
+    "column": "1",
+    "image": "black_rook"
+	},
+
+	{
+	"nickname": "b1P",
+    "name": "1st pawn",
+    "color": "black",
+    "position": "a2",
+    "row": "7",
+    "column": "1",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b2P",
+    "name": "2nd pawn",
+    "color": "black",
+    "position": "b2",
+    "row": "7",
+    "column": "2",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b3P",
+    "name": "3rd pawn",
+    "color": "black",
+    "position": "c2",
+    "row": "7",
+    "column": "3",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b4P",
+    "name": "4th pawn",
+    "color": "black",
+    "position": "d2",
+    "row": "7",
+    "column": "4",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b5P",
+    "name": "5th pawn",
+    "color": "black",
+    "position": "e2",
+    "row": "7",
+    "column": "5",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b6P",
+    "name": "6th pawn",
+    "color": "black",
+    "position": "f2",
+    "row": "7",
+    "column": "6",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b7P",
+    "name": "7th pawn",
+    "color": "black",
+    "position": "g2",
+    "row": "7",
+    "column": "7",
+    "image": "black_pawn"
+	},
+
+	{
+	"nickname": "b8P",
+    "name": "8th pawn",
+    "color": "black",
+    "position": "h2",
+    "row": "7",
+    "column": "8",
+    "image": "black_pawn"
+	}
+	]}
