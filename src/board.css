@@ -17,6 +17,7 @@
   max-height: 30em;
   max-width: 30em;
 }
+
 .game_piece {
   position: absolute;
   top: 0;
@@ -26,6 +27,19 @@
   vertical-align: middle;
   text-align: center;
   margin: auto;
+}
+
+
+.move_square {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 10%;
+  height: 10%;
+  vertical-align: middle;
+  text-align: center;
+  margin: auto;
+  background-color: rgba(155, 255, 55, 0.25);
 }
 
 .game_piece img {width:100%;}
