@@ -90,7 +90,7 @@ export class Piece extends Component {
             back = 'transparent'
         }
         return (
-            <div
+            <div draggable='true'
                 style={{top:  'calc(('+offset.toString()+')*(3em)',
                         left: 'calc(3em*'+this.props.peace.column.toString()+')',
                         backgroundColor: back}}
