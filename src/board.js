@@ -34,7 +34,7 @@ export class Board extends Component {
     this.state = {
       name: 'chess board',
       squares: squares,
-      size: '3em'
+      size: this.props.size
     }
     this.piece_in_square = this.piece_in_square.bind(this);
     
@@ -97,7 +97,7 @@ export class Board extends Component {
             row={square.row}
             column={square.column}
             click={this.piece_in_square}
-            size = {this.state.size}
+            size = {this.props.size}
           />
   } ))
   

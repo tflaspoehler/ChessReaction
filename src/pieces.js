@@ -136,12 +136,15 @@ export class Piece extends Component {
                             left: this.state.left + 'px',
                             width: this.props.size,
                             height: this.props.size,
-                            backgroundColor: back}}
+                            backgroundColor: back,
+                            zIndex: '2'
+                            }}
                     id={this.props.peace.name} class="game_piece" 
                     onClick={() => this.handleClick()}
                     onMouseDown={this.mouseDown}
                 >
                     <img
+                        style={{cursor: 'grabbing'}}
                         src={this.state.image}
                         alt={this.state.name}
                     />
@@ -156,12 +159,15 @@ export class Piece extends Component {
                             left: this.props.left,
                             width: this.props.size,
                             height: this.props.size,
-                            backgroundColor: back}}
+                            backgroundColor: back,
+                            zIndex: '1'
+                            }}
                     id={this.props.peace.name} class="game_piece" 
                     onClick={() => this.handleClick()}
                     onMouseDown={this.mouseDown}
                 >
                     <img
+                        style={{cursor: 'grab'}}
                         src={this.state.image}
                         alt={this.state.name}
                     />

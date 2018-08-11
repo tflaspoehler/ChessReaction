@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 
-
 export class Square extends Component {
   constructor(props) {
     super(props)
@@ -10,6 +9,7 @@ export class Square extends Component {
       id: this.props.key,
       row: this.props.row,
       column: this.props.column,
+      size: this.props.size,
       shade: this.props.shade,
       move: this.props.move,
       red: 0, green: 0, blue: 0
@@ -27,8 +27,8 @@ export class Square extends Component {
     return (
       <div 
         style={{position: 'absolute',
-                top:  'calc(('+x.toString()+')*(3em)',
-                left: 'calc(3em*'+y.toString()+')',
+                top:  'calc(('+x.toString()+')*('+this.props.size+')',
+                left: 'calc('+this.props.size+'*'+y.toString()+')',
                 }}    
         className={this.state.shade + this.props.move + ' square'} 
         id={this.props.key} 

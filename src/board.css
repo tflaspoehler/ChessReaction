@@ -38,14 +38,16 @@
 .square  {
   width:  10%;
   height: 10%;
+  outline: 0.5px solid #000;
+  outline-offset: -0.25px;
   display: table-cell;
 }
 .label  {
   width:  10%;
   height: 10%;
   display: table-cell;
-  background-color: #eee;
 }
+
 .grave {
   padding: 1px;
   width: 10px;
