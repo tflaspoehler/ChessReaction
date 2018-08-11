@@ -22,39 +22,29 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 10%;
-  height: 10%;
+  width: 3em;
+  height: 3em;
   vertical-align: middle;
   text-align: center;
   margin: auto;
 }
 
-
-.move_square {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 10%;
-  height: 10%;
-  vertical-align: middle;
-  text-align: center;
-  margin: auto;
-  background-color: rgba(155, 255, 55, 0.25);
+.game_piece img {
+  width:100%;
+  cursor: pointer;
+  draggable: 
 }
-
-.game_piece img {width:100%;}
 
 .square  {
   width:  10%;
   height: 10%;
-  outline: 2px solid black;
-  outline-offset: -1px;
   display: table-cell;
 }
 .label  {
   width:  10%;
   height: 10%;
   display: table-cell;
+  background-color: #eee;
 }
 .grave {
   padding: 1px;
@@ -67,6 +57,10 @@
 }
 .dark  {
   background-color: #acf;
+}
+
+.move {
+  background-color: rgba(155, 255, 55, 0.25);
 }
 
 .row {
