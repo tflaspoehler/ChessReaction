@@ -107,7 +107,9 @@ export class Piece extends Component {
             dragging: false
         })
         console.log(this.props.turn, this.state.color)
+        if (this.state.name === 'king') {console.log('this is a king.')}
         if (this.props.turn === this.state.color) {
+            console.log('   and we are trying to move')
             this.props.onMove({x: -1, y: -1})
             this.props.onUp(e)
         }
@@ -115,7 +117,7 @@ export class Piece extends Component {
     }
 
     mouseMove (e) {
-        let pos = {x: e.clientX - (this.state.offset.x), y: e.clientY - this.state.offset.y}
+        let pos = {x: e.pageX - (this.state.offset.x), y: e.pageY - this.state.offset.y}
         this.setState({
             left: pos.x,
             top: pos.y

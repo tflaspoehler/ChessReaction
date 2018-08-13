@@ -109,7 +109,8 @@ export class Game extends Component {
     else {
       var gravy = [];
     }
-    if (this.state.active > 0) {
+    if (this.state.active > -1) {
+      console.log(peace[i].color, this.state.turn)
       if (peace[i].color != this.state.turn) {
         let moves = get_moves(this.state.pieces, this.state.active, this.state.positions, false)
         for (let j=0; j < moves.length; j++) {
@@ -154,7 +155,6 @@ export class Game extends Component {
     const peace = this.state.pieces.slice();
     const positions = this.state.positions.slice();
 
-    console.log('attempting to move piece', peace[this.state.active].name)
     positions[peace[this.state.active].row-1][peace[this.state.active].column-1] = -1
     positions[row-1][column-1] = this.state.active
     peace[this.state.active].row = row
@@ -211,7 +211,7 @@ export class Game extends Component {
   }
 
   attack_piece(e) {
-    let pos = {x: e.clientX, y: e.clientY}
+    let pos = {x: e.pageX, y: e.pageY}
     if (this.state.active > -1) {
       if (this.state.rect.left+this.state.size   <= pos.x &&
           this.state.rect.right-this.state.size  >= pos.x &&
@@ -227,7 +227,8 @@ export class Game extends Component {
               }
             }
             else {
-              if (this.state.pieces[this.state.active].moves.length > 1) {
+              console.log(this.state.pieces[this.state.active].moves)
+              if (this.state.pieces[this.state.active].moves.length > 0) {
                 for (let m = 0; m < this.state.pieces[this.state.active].moves.length; m++) {
                   if (this.state.pieces[this.state.active].moves[m][0] === pos.y+1 && this.state.pieces[this.state.active].moves[m][1] === pos.x+1) {
                     this.move_piece(pos.y+1, pos.x+1)
@@ -241,7 +242,7 @@ export class Game extends Component {
   }
 
   highlight_square(e) {
-    let pos = {x: e.clientX, y: e.clientY}
+    let pos = {x: e.pageX, y: e.pageY}
     if (this.state.rect.left+this.state.size   <= pos.x &&
         this.state.rect.right-this.state.size  >= pos.x &&
         this.state.rect.top+this.state.size    <= pos.y &&

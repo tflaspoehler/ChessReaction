@@ -334,7 +334,7 @@ function pawn_moves(pieces, active, squares, all) {
         }    
     }    
     else {
-        if (color === 'white') {
+        if (color === 'white' && row < 8) {
             if (squares[row][column-1] === -1) {
                 moves.push([row+1, column])
                 if (row === 2 && squares[row+1][column-1] === -1) {moves.push([row+2, column])}
@@ -342,7 +342,7 @@ function pawn_moves(pieces, active, squares, all) {
             if (column < 8 && squares[row][column]   !== -1 && pieces[squares[row][column]].color   !== pieces[active].color) {moves.push([row+1, column+1])}
             if (column > 1 && squares[row][column-2] !== -1 && pieces[squares[row][column-2]].color !== pieces[active].color) {moves.push([row+1, column-1])}
         }
-        else {
+        else if (color === 'black' && row > 1) {
             if (squares[row-2][column-1] === -1) {
                 moves.push([row-1, column])
                 if (row === 7 && squares[row-3][column-1] === -1) {moves.push([row-2, column])}
