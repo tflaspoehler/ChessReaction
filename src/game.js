@@ -87,7 +87,8 @@ export class Game extends Component {
       turn: 'white',
       size: '3em',
       drag: null,
-      rect: null
+      rect: null,
+      last: null
 
     }
     this.active_piece = this.active_piece.bind(this);

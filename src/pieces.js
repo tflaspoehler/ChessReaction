@@ -117,7 +117,7 @@ export class Piece extends Component {
     }
 
     mouseMove (e) {
-        let pos = {x: e.pageX - (this.state.offset.x), y: e.pageY - this.state.offset.y}
+        let pos = {x: e.clientX - (this.state.offset.x), y: e.clientY - this.state.offset.y}
         this.setState({
             left: pos.x,
             top: pos.y
