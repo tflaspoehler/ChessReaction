@@ -91,8 +91,10 @@ export class Piece extends Component {
             dragging: true,
             left: rect.x,
             top: rect.y,
-            offset: {x: e.clientX - rect.x, y: e.clientY - rect.y},
+            offset: {x: rect.width/2, y: rect.height/2},
         })
+        this.props.onDown(this.state.key)
+        this.props.onMove(e)
         e.preventDefault()
     }
 
@@ -104,15 +106,21 @@ export class Piece extends Component {
             left: 'calc('+this.state.size+'*'+this.state.column.toString()+')',
             dragging: false
         })
-        this.props.onClick(this.state.key)
+        console.log(this.props.turn, this.state.color)
+        if (this.props.turn === this.state.color) {
+            this.props.onMove({x: -1, y: -1})
+            this.props.onUp(e)
+        }
+        // this.props.onClick(this.state.key)
     }
 
     mouseMove (e) {
-        let pos = {x: e.clientX - this.state.offset.x, y: e.clientY - this.state.offset.y}
+        let pos = {x: e.clientX - (this.state.offset.x), y: e.clientY - this.state.offset.y}
         this.setState({
             left: pos.x,
             top: pos.y
         })
+        this.props.onMove(e)
     }
     
     handleClick () {
@@ -137,10 +145,9 @@ export class Piece extends Component {
                             width: this.props.size,
                             height: this.props.size,
                             backgroundColor: back,
-                            zIndex: '2'
+                            zIndex: '5'
                             }}
                     id={this.props.peace.name} class="game_piece" 
-                    onClick={() => this.handleClick()}
                     onMouseDown={this.mouseDown}
                 >
                     <img
@@ -163,7 +170,6 @@ export class Piece extends Component {
                             zIndex: '1'
                             }}
                     id={this.props.peace.name} class="game_piece" 
-                    onClick={() => this.handleClick()}
                     onMouseDown={this.mouseDown}
                 >
                     <img

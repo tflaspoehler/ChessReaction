@@ -64,6 +64,7 @@ export class Game extends Component {
       }
     }
     for (let i = 0; i < data.pieces.length; i++) {
+      positions[data.pieces[i].row - 1][data.pieces[i].column - 1] = i
       pieces.push({
         key: i,
         name: data.pieces[i].name,
@@ -73,7 +74,7 @@ export class Game extends Component {
         image: images[data.pieces[i].image],
         row: parseInt(data.pieces[i].row),
         column: parseInt(data.pieces[i].column),
-        id: i
+        id: i,
       })
     }
     this.state = {
@@ -82,14 +83,20 @@ export class Game extends Component {
       pieces: pieces,
       positions: positions,
       grave: [],
-      moves: [[-1, -1]],
+      moves: [],
       turn: 'white',
-      size: '3em'
+      size: '3em',
+      drag: null,
+      rect: null
+
     }
     this.active_piece = this.active_piece.bind(this);
     this.select_empty_square = this.select_empty_square.bind(this);
     this.setSize = this.setSize.bind(this);
+    this.highlight_square = this.highlight_square.bind(this);
+    this.attack_piece = this.attack_piece.bind(this);
   }
+
 
   piece_in_square(i) {
   }
@@ -104,7 +111,7 @@ export class Game extends Component {
     }
     if (this.state.active > 0) {
       if (peace[i].color != this.state.turn) {
-        let moves = get_moves(peace, this.state.active, this.state.positions)
+        let moves = get_moves(this.state.pieces, this.state.active, this.state.positions, false)
         for (let j=0; j < moves.length; j++) {
           if (moves[j][0] === peace[i].row && moves[j][1] === peace[i].column) {
             let positions = this.state.positions.slice();
@@ -116,20 +123,30 @@ export class Game extends Component {
             for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
             let turn = 'white'
             if (this.state.turn === 'white') {turn = 'black'}            
-            this.setState({pieces: peace, positions: positions, active: -1, turn: turn, grave: gravy})
+            this.setState({pieces: peace, positions: positions, active: -1, turn: turn, grave: gravy, moves: [], drag: null})
             break;
           }
         }
       }
       else {
-        this.setState({active: i})
+        let moves = get_moves(this.state.pieces, i, this.state.positions, false)
+        this.setState({active: i,
+                       moves: moves,
+                      drag: null})
       }
     }
     else {
       if (this.state.turn != peace[i].color) {
-        i = -1
+        this.setState({active: -1,
+                       moves: [],
+                      drag: null})
       }
-      this.setState({active: i})
+      else {
+        let moves = this.state.pieces[i].moves
+        this.setState({active: i,
+                       moves: moves,
+                      drag: null})
+      }
     }
   }
 
@@ -146,7 +163,7 @@ export class Game extends Component {
     if (this.state.turn === "white") {
       turn = "black"      
     }
-    this.setState({pieces: peace, positions: positions, active: -1, turn: turn})
+    this.setState({pieces: peace, positions: positions, active: -1, turn: turn, moves: []})
   }
 
   create_pieces = () => {
@@ -157,6 +174,7 @@ export class Game extends Component {
       peace[i].moves = get_moves(peace, i, this.state.positions, false)
     }
 
+
     let offset = 0
     for (let i = 0; i < this.state.pieces.length ; i++) {
       offset = 9 - this.state.pieces[i].row
@@ -165,12 +183,14 @@ export class Game extends Component {
                     key={this.state.pieces[i].key}
                     id={i}
                     peace={this.state.pieces[i]}
-                    onClick={() => this.active_piece(i)}
+                    onDown={() => this.active_piece(i)}
+                    onMove={this.highlight_square}
+                    onUp={this.attack_piece}
                     active={this.state.active}
                     turn={this.state.turn}
                     position='absolute'
-                    top={'calc(('+offset.toString()+')*'+this.state.size+''}
-                    left={'calc('+this.state.size+'*'+this.state.pieces[i].column.toString()+')'}
+                    top={'calc(('+offset.toString()+')*'+this.state.size+'px'}
+                    left={'calc('+this.state.size+'px*'+this.state.pieces[i].column.toString()+')'}
                     size={this.state.size}
                       />)
     }
@@ -180,7 +200,6 @@ export class Game extends Component {
     row = row + 1
     column = column + 1
     if (this.state.active > -1) {
-      console.log(this.state.pieces[this.state.active].row)
       if (this.state.pieces[this.state.active].moves.length > 1) {
         for (let p = 0; p < this.state.pieces[this.state.active].moves.length; p++) {
           if (this.state.pieces[this.state.active].moves[p][0] === row && this.state.pieces[this.state.active].moves[p][1] === column) {
@@ -191,21 +210,71 @@ export class Game extends Component {
     }
   }
 
+  attack_piece(e) {
+    let pos = {x: e.clientX, y: e.clientY}
+    if (this.state.active > -1) {
+      if (this.state.rect.left+this.state.size   <= pos.x &&
+          this.state.rect.right-this.state.size  >= pos.x &&
+          this.state.rect.top+this.state.size    <= pos.y &&
+          this.state.rect.bottom-this.state.size >= pos.y) {
+            pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / this.state.size)
+            pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / this.state.size)
+            pos.x = parseInt(pos.x)
+            pos.y = parseInt(8 - pos.y - 1)
+            if (this.state.positions[pos.y][pos.x] > -1) {
+              if (this.state.pieces[this.state.positions[pos.y][pos.x]].color !== this.state.pieces[this.state.active].color) {
+                this.active_piece(this.state.positions[pos.y][pos.x])
+              }
+            }
+            else {
+              if (this.state.pieces[this.state.active].moves.length > 1) {
+                for (let m = 0; m < this.state.pieces[this.state.active].moves.length; m++) {
+                  if (this.state.pieces[this.state.active].moves[m][0] === pos.y+1 && this.state.pieces[this.state.active].moves[m][1] === pos.x+1) {
+                    this.move_piece(pos.y+1, pos.x+1)
+                    break
+                  }
+                }
+              }
+            }
+      }    
+    }
+  }
+
+  highlight_square(e) {
+    let pos = {x: e.clientX, y: e.clientY}
+    if (this.state.rect.left+this.state.size   <= pos.x &&
+        this.state.rect.right-this.state.size  >= pos.x &&
+        this.state.rect.top+this.state.size    <= pos.y &&
+        this.state.rect.bottom-this.state.size >= pos.y) {
+          pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / this.state.size)
+          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / this.state.size)
+          pos.x = parseInt(pos.x)
+          pos.y = parseInt(8 - pos.y - 1)
+      this.setState({
+        drag: pos
+      })
+    }
+  }
+
   componentDidMount() {
     window.addEventListener("resize", this.setSize);
+    this.setSize()
   }
 
   setSize() {
-    console.log('resetting size')
-    let square = ReactDOM.findDOMNode(this).getBoundingClientRect().width/10+'px'
+    let rect = ReactDOM.findDOMNode(this).getBoundingClientRect()
+    let square = rect.width/10
     this.setState({
-      size: square
+      size: square,
+      rect: rect
     })
   }
   render() {
+    console.log('---------------------------------------------------------------------')
+    console.log('rendering new board with active piece', this.state.active)
     return (
       <div className="Game">
-        <Board click={this.select_empty_square} size={this.state.size}/>
+        <Board click={this.select_empty_square} size={this.state.size+'px'} moves={this.state.moves} drag={this.state.drag} />
         <div>{this.create_pieces()}</div>
       </div>
     )

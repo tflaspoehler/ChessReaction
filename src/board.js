@@ -21,8 +21,9 @@ export class Board extends Component {
           column: j,
           id: s,
           shade: shade,
-          move: ' '
-        })
+          highlight: false,
+          move: false
+                })
       if (shade === 'light') {shade = 'dark'}
       else {shade = 'light'}
       s++
@@ -34,7 +35,9 @@ export class Board extends Component {
     this.state = {
       name: 'chess board',
       squares: squares,
-      size: this.props.size
+      moves: this.props.moves,
+      size: this.props.size,
+      drag: this.props.drag
     }
     this.piece_in_square = this.piece_in_square.bind(this);
     
@@ -88,18 +91,47 @@ export class Board extends Component {
   
   row = []
   let squares = [].concat.apply([], this.state.squares.slice())
+  if (this.props.drag !== null) {
+    squares[(this.props.drag.y*8)+this.props.drag.x].highlight = true
+  }
+  
+  if (this.props.moves.length > 0) {
+    for (let m = 0; m < this.props.moves.length; m++) {
+      squares[((this.props.moves[m][0]-1)*8-1)+this.props.moves[m][1]].move = true
+    }
+  }
+
   bored.push(squares.map(square => {
-   return <Square
-            name={column_names[square.column]+(square.row+1)}
-            key={square.key}
-            shade={square.shade}
-            move={square.move}
-            row={square.row}
-            column={square.column}
-            click={this.piece_in_square}
+    let move = square.move
+    if (this.props.moves.length > 0) {
+      for (let m = 0; m < this.props.moves.length; m++) {
+        if (square.row === this.props.moves[m][0]-1 && square.column === this.props.moves[m][1]-1) {
+          move = true
+        }
+      }
+    }
+    return <Square
+            name = {column_names[square.column]+(square.row+1)}
+            key = {square.key}
+            shade = {square.shade}
+            move = {square.move}
+            highlight = {square.highlight}
+            row = {square.row}
+            column = {square.column}
+            click = {this.piece_in_square}
             size = {this.props.size}
           />
   } ))
+
+  if (this.props.drag !== null) {
+    squares[(this.props.drag.y*8)+this.props.drag.x].highlight = false
+  }
+  
+  if (this.props.moves.length > 0) {
+    for (let m = 0; m < this.props.moves.length; m++) {
+      squares[((this.props.moves[m][0]-1)*8-1)+this.props.moves[m][1]].move = false
+    }
+  }  
   
   return bored}
 
