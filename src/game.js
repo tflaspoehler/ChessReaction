@@ -46,6 +46,7 @@ export class Game extends Component {
     let pieces = []
     let shade = 'dark'
     let s = 0
+    let moves = []
     for (let r = 0; r < 8; r++) {
       positions.push(Array(8).fill(-1))
     }
@@ -65,6 +66,7 @@ export class Game extends Component {
     }
     for (let i = 0; i < data.pieces.length; i++) {
       positions[data.pieces[i].row - 1][data.pieces[i].column - 1] = i
+
       pieces.push({
         key: i,
         name: data.pieces[i].name,
@@ -74,8 +76,12 @@ export class Game extends Component {
         image: images[data.pieces[i].image],
         row: parseInt(data.pieces[i].row),
         column: parseInt(data.pieces[i].column),
-        id: i,
+        id: i
       })
+    }
+    for (let i = 0; i < data.pieces.length; i++) {
+            moves = get_moves(pieces, i, positions)
+            pieces[i].moves = moves
     }
     this.state = {
       name: 'chess',
@@ -88,12 +94,14 @@ export class Game extends Component {
       size: '3em',
       drag: null,
       rect: null,
-      last: null
+      last: null,
+      offset: 0
 
     }
     this.active_piece = this.active_piece.bind(this);
     this.select_empty_square = this.select_empty_square.bind(this);
     this.setSize = this.setSize.bind(this);
+    this.handleScroll = this.handleScroll.bind(this);
     this.highlight_square = this.highlight_square.bind(this);
     this.attack_piece = this.attack_piece.bind(this);
   }
@@ -153,6 +161,7 @@ export class Game extends Component {
   }
 
   move_piece(row, column) {
+    console.log('moving ', this.state.pieces[this.state.active].color, this.state.pieces[this.state.active].name)
     const peace = this.state.pieces.slice();
     const positions = this.state.positions.slice();
 
@@ -160,6 +169,38 @@ export class Game extends Component {
     positions[row-1][column-1] = this.state.active
     peace[this.state.active].row = row
     peace[this.state.active].column = column
+    console.log(peace[this.state.active].name, peace[this.state.active].row)
+    if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
+      console.log('queening')
+      peace[this.state.active].name = 'queen'
+      peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
+      console.log(peace[this.state.active].image)
+    }
+
+    let turn = "white"
+    if (this.state.turn === "white") {
+      turn = "black"      
+    }
+    this.setState({pieces: peace, positions: positions, active: -1, turn: turn, moves: []})
+  }
+
+  kill_piece(row, column) {
+    console.log('moving ', this.state.pieces[this.state.active].color, this.state.pieces[this.state.active].name)
+    const peace = this.state.pieces.slice();
+    const positions = this.state.positions.slice();
+
+    positions[peace[this.state.active].row-1][peace[this.state.active].column-1] = -1
+    positions[row-1][column-1] = this.state.active
+    peace[this.state.active].row = row
+    peace[this.state.active].column = column
+    console.log(peace[this.state.active].name, peace[this.state.active].row)
+    if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
+      console.log('queening')
+      peace[this.state.active].name = 'queen'
+      peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
+      console.log(peace[this.state.active].image)
+    }
+
     let turn = "white"
     if (this.state.turn === "white") {
       turn = "black"      
@@ -200,11 +241,19 @@ export class Game extends Component {
   select_empty_square(row, column) {
     row = row + 1
     column = column + 1
+    console.log('select_empty_square', this.state.active)
     if (this.state.active > -1) {
-      if (this.state.pieces[this.state.active].moves.length > 1) {
+      if (this.state.pieces[this.state.active].moves.length > 0) {
         for (let p = 0; p < this.state.pieces[this.state.active].moves.length; p++) {
           if (this.state.pieces[this.state.active].moves[p][0] === row && this.state.pieces[this.state.active].moves[p][1] === column) {
-            this.move_piece(row, column)
+            if (this.state.positions[row-1][column-1] > -1) {
+              console.log('attacking piece from empty square', this.state.positions[row-1][column-1])
+              this.active_piece(this.state.positions[row-1][column-1])
+            }
+            else {
+              console.log('moving piece to empty square')
+              this.move_piece(row, column)
+            }
           }
         }
       }
@@ -212,7 +261,9 @@ export class Game extends Component {
   }
 
   attack_piece(e) {
-    let pos = {x: e.pageX, y: e.pageY}
+    let pos = {x: e.clientX, y: e.clientY}
+    console.log('actual click positions', e.clientX, e.clientY)
+    console.log('board rect', this.state.rect.left, this.state.rect.top)
     if (this.state.active > -1) {
       if (this.state.rect.left+this.state.size   <= pos.x &&
           this.state.rect.right-this.state.size  >= pos.x &&
@@ -228,7 +279,7 @@ export class Game extends Component {
               }
             }
             else {
-              console.log(this.state.pieces[this.state.active].moves)
+              console.log(this.state.pieces[this.state.active].moves, pos.x, pos.y)
               if (this.state.pieces[this.state.active].moves.length > 0) {
                 for (let m = 0; m < this.state.pieces[this.state.active].moves.length; m++) {
                   if (this.state.pieces[this.state.active].moves[m][0] === pos.y+1 && this.state.pieces[this.state.active].moves[m][1] === pos.x+1) {
@@ -243,13 +294,13 @@ export class Game extends Component {
   }
 
   highlight_square(e) {
-    let pos = {x: e.pageX, y: e.pageY}
+    let pos = {x: e.clientX, y: e.clientY}
     if (this.state.rect.left+this.state.size   <= pos.x &&
         this.state.rect.right-this.state.size  >= pos.x &&
         this.state.rect.top+this.state.size    <= pos.y &&
         this.state.rect.bottom-this.state.size >= pos.y) {
           pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / this.state.size)
-          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / this.state.size)
+          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / this.state.size)
           pos.x = parseInt(pos.x)
           pos.y = parseInt(8 - pos.y - 1)
       this.setState({
@@ -260,6 +311,7 @@ export class Game extends Component {
 
   componentDidMount() {
     window.addEventListener("resize", this.setSize);
+    window.addEventListener('scroll', this.handleScroll);
     this.setSize()
   }
 
@@ -269,6 +321,13 @@ export class Game extends Component {
     this.setState({
       size: square,
       rect: rect
+    })
+  }
+
+  handleScroll(event) {
+    let top = event.srcElement.body.scrollTop
+    this.setState({
+      offset: top
     })
   }
   render() {

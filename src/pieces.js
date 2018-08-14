@@ -107,7 +107,6 @@ export class Piece extends Component {
             dragging: false
         })
         console.log(this.props.turn, this.state.color)
-        if (this.state.name === 'king') {console.log('this is a king.')}
         if (this.props.turn === this.state.color) {
             console.log('   and we are trying to move')
             this.props.onMove({x: -1, y: -1})
@@ -154,8 +153,8 @@ export class Piece extends Component {
                 >
                     <img
                         style={{cursor: 'grabbing'}}
-                        src={this.state.image}
-                        alt={this.state.name}
+                        src={this.props.peace.image}
+                        alt={this.props.peace.name}
                     />
                 </div>
             );
@@ -176,8 +175,8 @@ export class Piece extends Component {
                 >
                     <img
                         style={{cursor: 'grab'}}
-                        src={this.state.image}
-                        alt={this.state.name}
+                        src={this.props.peace.image}
+                        alt={this.props.peace.name}
                     />
                 </div>
             );            
