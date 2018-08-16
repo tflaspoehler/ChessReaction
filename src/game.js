@@ -99,7 +99,7 @@ export class Game extends Component {
 
     }
     this.active_piece = this.active_piece.bind(this);
-    this.select_empty_square = this.select_empty_square.bind(this);
+    this.select_square = this.select_square.bind(this);
     this.setSize = this.setSize.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.highlight_square = this.highlight_square.bind(this);
@@ -169,43 +169,48 @@ export class Game extends Component {
     positions[row-1][column-1] = this.state.active
     peace[this.state.active].row = row
     peace[this.state.active].column = column
-    console.log(peace[this.state.active].name, peace[this.state.active].row)
     if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
-      console.log('queening')
       peace[this.state.active].name = 'queen'
       peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
-      console.log(peace[this.state.active].image)
     }
 
-    let turn = "white"
-    if (this.state.turn === "white") {
-      turn = "black"      
-    }
-    this.setState({pieces: peace, positions: positions, active: -1, turn: turn, moves: []})
+    let turn = this.next_turn() 
+
+    this.setState({pieces: peace, positions: positions, active: -1, moves: [], turn: turn})
   }
 
-  kill_piece(row, column) {
-    console.log('moving ', this.state.pieces[this.state.active].color, this.state.pieces[this.state.active].name)
-    const peace = this.state.pieces.slice();
-    const positions = this.state.positions.slice();
-
-    positions[peace[this.state.active].row-1][peace[this.state.active].column-1] = -1
-    positions[row-1][column-1] = this.state.active
-    peace[this.state.active].row = row
-    peace[this.state.active].column = column
-    console.log(peace[this.state.active].name, peace[this.state.active].row)
-    if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
-      console.log('queening')
-      peace[this.state.active].name = 'queen'
-      peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
-      console.log(peace[this.state.active].image)
-    }
-
+  next_turn () {
     let turn = "white"
     if (this.state.turn === "white") {
-      turn = "black"      
+      turn = "black"
     }
-    this.setState({pieces: peace, positions: positions, active: -1, turn: turn, moves: []})
+    return turn
+    }
+
+  kill_piece(row, column) {
+    var positions = this.state.positions
+    var peace = this.state.pieces.slice();
+    if (this.state.grave.length > 0) {
+      var gravy = this.state.grave.slice();
+    }
+    else {
+      var gravy = [];
+    }
+    row += -1
+    column += -1
+
+    peace[this.state.active].row = row + 1
+    peace[this.state.active].column = column + 1
+
+    console.log('killing ', peace[this.state.positions[row][column]].color, peace[this.state.positions[row][column]].name)
+    gravy.push(peace[this.state.positions[row][column]])
+    peace.splice(this.state.positions[row][column], 1)
+
+    for (let p = 0; p < 8; p++) {positions[p]=Array(8).fill(-1)}
+    for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
+
+    let turn = this.next_turn()
+    this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: []})
   }
 
   create_pieces = () => {
@@ -213,6 +218,7 @@ export class Game extends Component {
     let population = [];
     const peace = this.state.pieces.slice()
     for (let i = 0; i < peace.length ; i++) {
+      console.log('getting moves for', i)
       peace[i].moves = get_moves(peace, i, this.state.positions, false)
     }
 
@@ -238,20 +244,17 @@ export class Game extends Component {
     }
     return population
   }
-  select_empty_square(row, column) {
+  select_square(row, column) {
     row = row + 1
     column = column + 1
-    console.log('select_empty_square', this.state.active)
     if (this.state.active > -1) {
       if (this.state.pieces[this.state.active].moves.length > 0) {
         for (let p = 0; p < this.state.pieces[this.state.active].moves.length; p++) {
           if (this.state.pieces[this.state.active].moves[p][0] === row && this.state.pieces[this.state.active].moves[p][1] === column) {
             if (this.state.positions[row-1][column-1] > -1) {
-              console.log('attacking piece from empty square', this.state.positions[row-1][column-1])
-              this.active_piece(this.state.positions[row-1][column-1])
+              this.kill_piece(row, column)
             }
             else {
-              console.log('moving piece to empty square')
               this.move_piece(row, column)
             }
           }
@@ -335,7 +338,7 @@ export class Game extends Component {
     console.log('rendering new board with active piece', this.state.active)
     return (
       <div className="Game">
-        <Board click={this.select_empty_square} size={this.state.size+'px'} moves={this.state.moves} drag={this.state.drag} />
+        <Board click={this.select_square} size={this.state.size+'px'} moves={this.state.moves} drag={this.state.drag} />
         <div>{this.create_pieces()}</div>
       </div>
     )
