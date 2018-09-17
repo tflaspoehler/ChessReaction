@@ -168,7 +168,6 @@ export class Piece extends Component {
                             width: this.props.size,
                             height: this.props.size,
                             backgroundColor: back,
-                            zIndex: '1'
                             }}
                     id={this.props.peace.name} class="game_piece" 
                     onMouseDown={this.mouseDown}

@@ -125,6 +125,9 @@ export class Game extends Component {
         for (let j=0; j < moves.length; j++) {
           if (moves[j][0] === peace[i].row && moves[j][1] === peace[i].column) {
             let positions = this.state.positions.slice();
+            var last = []
+            last.push([peace[this.state.active].row, peace[this.state.active].column])
+            last.push([peace[i].row, peace[i].column])
             peace[this.state.active].row = peace[i].row
             peace[this.state.active].column = peace[i].column
             gravy.push(peace[i])
@@ -133,7 +136,7 @@ export class Game extends Component {
             for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
             let turn = 'white'
             if (this.state.turn === 'white') {turn = 'black'}            
-            this.setState({pieces: peace, positions: positions, active: -1, turn: turn, grave: gravy, moves: [], drag: null})
+            this.setState({pieces: peace, positions: positions, active: -1, turn: turn, grave: gravy, moves: [], drag: null, last: last})
             break;
           }
         }
@@ -164,6 +167,9 @@ export class Game extends Component {
     console.log('moving ', this.state.pieces[this.state.active].color, this.state.pieces[this.state.active].name)
     const peace = this.state.pieces.slice();
     const positions = this.state.positions.slice();
+    var last = []
+    last.push([peace[this.state.active].row, peace[this.state.active].column])
+    last.push([row, column])
 
     positions[peace[this.state.active].row-1][peace[this.state.active].column-1] = -1
     positions[row-1][column-1] = this.state.active
@@ -176,7 +182,7 @@ export class Game extends Component {
 
     let turn = this.next_turn() 
 
-    this.setState({pieces: peace, positions: positions, active: -1, moves: [], turn: turn})
+    this.setState({pieces: peace, positions: positions, active: -1, moves: [], turn: turn, last: last})
   }
 
   next_turn () {
@@ -189,7 +195,8 @@ export class Game extends Component {
 
   kill_piece(row, column) {
     var positions = this.state.positions
-    var peace = this.state.pieces.slice();
+    var peace = this.state.pieces.slice()
+    var last = []
     if (this.state.grave.length > 0) {
       var gravy = this.state.grave.slice();
     }
@@ -198,6 +205,9 @@ export class Game extends Component {
     }
     row += -1
     column += -1
+
+    last.push([peace[this.state.active].row, peace[this.state.active].column])
+    last.push([row, column])
 
     peace[this.state.active].row = row + 1
     peace[this.state.active].column = column + 1
@@ -210,7 +220,9 @@ export class Game extends Component {
     for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
 
     let turn = this.next_turn()
-    this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: []})
+
+
+    this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: [], last: last})
   }
 
   create_pieces = () => {
@@ -218,7 +230,6 @@ export class Game extends Component {
     let population = [];
     const peace = this.state.pieces.slice()
     for (let i = 0; i < peace.length ; i++) {
-      console.log('getting moves for', i)
       peace[i].moves = get_moves(peace, i, this.state.positions, false)
     }
 
@@ -272,8 +283,8 @@ export class Game extends Component {
           this.state.rect.right-this.state.size  >= pos.x &&
           this.state.rect.top+this.state.size    <= pos.y &&
           this.state.rect.bottom-this.state.size >= pos.y) {
-            pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / this.state.size)
-            pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / this.state.size)
+            pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / parseFloat(this.state.size))
+            pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / parseFloat(this.state.size))
             pos.x = parseInt(pos.x)
             pos.y = parseInt(8 - pos.y - 1)
             if (this.state.positions[pos.y][pos.x] > -1) {
@@ -302,8 +313,8 @@ export class Game extends Component {
         this.state.rect.right-this.state.size  >= pos.x &&
         this.state.rect.top+this.state.size    <= pos.y &&
         this.state.rect.bottom-this.state.size >= pos.y) {
-          pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / this.state.size)
-          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / this.state.size)
+          pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / parseFloat(this.state.size))
+          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / parseFloat(this.state.size))
           pos.x = parseInt(pos.x)
           pos.y = parseInt(8 - pos.y - 1)
       this.setState({
@@ -329,16 +340,48 @@ export class Game extends Component {
 
   handleScroll(event) {
     let top = event.srcElement.body.scrollTop
+    top = window.scrollY
     this.setState({
       offset: top
     })
   }
+
+  draw_lines() {
+    if (this.state.last) {
+      var last = this.state.last
+      let dy = last[0][0]-last[1][0]
+      let dx = last[0][1]-last[1][1]
+      let length = parseInt(this.state.size * Math.sqrt((Math.pow(dx,2)+(Math.pow(dy,2)))))
+      let angle = 180*Math.atan2(dy, -dx)/Math.PI
+      let x = ((this.state.size*(last[0][1]-0.5)))
+      let y = ((this.state.size*(8.5-last[0][0])))
+      console.log("dy,dx,theta",-dy,dx,angle)
+      console.log("position")
+      return (
+        <div style={{position: "absolute",
+                    top:  this.state.size,
+                    left: this.state.size,
+                    zIndex: 4,
+                    pointerEvents: 'none'}}>
+            <svg width={parseInt(8*this.state.size)} height={parseInt(8*this.state.size)} xmlns="http://www.w3.org/2000/svg">
+              <path d={"M"+x+" " +(y+10)+ " c-10,0 -10,-20 0,-20 h"+(length-40)+" v-10 l40 20 l-40 20 v-10 Z"}  
+                       fill="red" 
+                       fill-opacity="0.4" 
+                       transform={"rotate("+angle+", "+x+", " +y+ ")"}/>
+        />
+            </svg>
+        </div>
+      )
+    }
+  }
+
   render() {
     console.log('---------------------------------------------------------------------')
     console.log('rendering new board with active piece', this.state.active)
     return (
       <div className="Game">
         <Board click={this.select_square} size={this.state.size+'px'} moves={this.state.moves} drag={this.state.drag} />
+        <div>{this.draw_lines()}</div>
         <div>{this.create_pieces()}</div>
       </div>
     )
