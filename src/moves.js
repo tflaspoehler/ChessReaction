@@ -4,6 +4,7 @@ export function get_moves(pieces, active, squares, all=false) {
     all = all || false
     if (piece.name.includes("king")) {
         moves = king_moves(pieces, active, squares, all);
+        moves = moves.concat(castle_moves(pieces, active, squares, all))
     }
     else if (piece.name.includes("queen")) {
         moves = bishop_moves(pieces, active, squares, all);
@@ -20,6 +21,21 @@ export function get_moves(pieces, active, squares, all=false) {
     }
     else if (piece.name.includes("pawn")) {
         moves = pawn_moves(pieces, active, squares, all);
+    }
+    return moves
+}
+
+function castle_moves(pieces, active, squares, all) {
+    const row = pieces[active].row
+    const column = pieces[active].column
+    var moves = []
+    if (!pieces[active].history) {
+        if (squares[row-1][column+2] !== -1 && !pieces[squares[row-1][column+2]].history && squares[row-1][column+1] === -1 && squares[row-1][column] === -1) {
+            moves.push([row, column+2])
+        }
+        if (squares[row-1][column-5] !== -1 && !pieces[squares[row-1][column-5]].history && squares[row-1][column-4] === -1 && squares[row-1][column-3] === -1 && squares[row-1][column-2] === -1) {
+            moves.push([row, column-2])
+        }
     }
     return moves
 }
@@ -45,16 +61,16 @@ function king_moves(pieces, active, squares, all) {
     else {
         if (row < 8) {
             if (squares[row][column-1] === -1 || pieces[squares[row][column-1]].color !== pieces[active].color) {moves.push([row+1, column])}
-            if (squares[row][column]   === -1 || pieces[squares[row][column]].color   !== pieces[active].color) if (column < 8) {moves.push([row+1, column+1])}
-            if (squares[row][column-2] === -1 || pieces[squares[row][column-2]].color !== pieces[active].color) if (column > 1) {moves.push([row+1, column-1])}
+            if ((column < 8) && (squares[row][column]   === -1 || pieces[squares[row][column]].color   !== pieces[active].color)) {moves.push([row+1, column+1])}
+            if ((column > 1) && (squares[row][column-2] === -1 || pieces[squares[row][column-2]].color !== pieces[active].color)) {moves.push([row+1, column-1])}
         }
         if (row > 1) {
             if (squares[row-2][column-1] === -1 || pieces[squares[row-2][column-1]].color !== pieces[active].color) moves.push([row-1, column])
-            if (squares[row-2][column]   === -1 || pieces[squares[row-2][column]].color   !== pieces[active].color) if (column < 8) {moves.push([row-1, column+1])}
-            if (squares[row-2][column-2] === -1 || pieces[squares[row-2][column-2]].color !== pieces[active].color) if (column > 1) {moves.push([row-1, column-1])}
+            if ((column < 8) && (squares[row-2][column]   === -1 || pieces[squares[row-2][column]].color   !== pieces[active].color)) {moves.push([row-1, column+1])}
+            if ((column > 1) && (squares[row-2][column-2] === -1 || pieces[squares[row-2][column-2]].color !== pieces[active].color)) {moves.push([row-1, column-1])}
         }
-        if (squares[row-1][column]   === -1 || pieces[squares[row-1][column]].color   !== pieces[active].color) if (column < 8) {moves.push([row, column+1])}
-        if (squares[row-1][column-2] === -1 || pieces[squares[row-1][column-2]].color !== pieces[active].color) if (column > 1) {moves.push([row, column-1])}
+        if ((column < 8) && (squares[row-1][column]   === -1 || pieces[squares[row-1][column]].color   !== pieces[active].color)) {moves.push([row, column+1])}
+        if ((column > 1) && (squares[row-1][column-2] === -1 || pieces[squares[row-1][column-2]].color !== pieces[active].color)) {moves.push([row, column-1])}
     }
     return moves
 }

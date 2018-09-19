@@ -76,12 +76,21 @@ export class Game extends Component {
         image: images[data.pieces[i].image],
         row: parseInt(data.pieces[i].row),
         column: parseInt(data.pieces[i].column),
-        id: i
+        id: i,
+        history: null
       })
     }
     for (let i = 0; i < data.pieces.length; i++) {
             moves = get_moves(pieces, i, positions)
             pieces[i].moves = moves
+            if (pieces[i].name.includes('king')) {
+              if (pieces[i].color === 'black') {
+                let black_king = i
+              }
+              else {
+                let white_king = i
+              }
+            }
     }
     this.state = {
       name: 'chess',
@@ -95,7 +104,8 @@ export class Game extends Component {
       drag: null,
       rect: null,
       last: null,
-      offset: 0
+      offset: window.scrollY,
+      check: null,
 
     }
     this.active_piece = this.active_piece.bind(this);
@@ -119,9 +129,8 @@ export class Game extends Component {
       var gravy = [];
     }
     if (this.state.active > -1) {
-      console.log(peace[i].color, this.state.turn)
       if (peace[i].color != this.state.turn) {
-        let moves = get_moves(this.state.pieces, this.state.active, this.state.positions, false)
+        let moves = peace[this.state.active].moves
         for (let j=0; j < moves.length; j++) {
           if (moves[j][0] === peace[i].row && moves[j][1] === peace[i].column) {
             let positions = this.state.positions.slice();
@@ -130,7 +139,14 @@ export class Game extends Component {
             last.push([peace[i].row, peace[i].column])
             peace[this.state.active].row = peace[i].row
             peace[this.state.active].column = peace[i].column
+            if (!peace[this.state.active].history) {
+              peace[this.state.active].history = [[peace[i].row, peace[i].column]]
+            }
             gravy.push(peace[i])
+            if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
+              peace[this.state.active].name = 'queen'
+              peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
+            }
             peace.splice(i, 1)
             for (let p = 0; p < 8; p++) {positions[p]=Array(8).fill(-1)}
             for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
@@ -142,7 +158,7 @@ export class Game extends Component {
         }
       }
       else {
-        let moves = get_moves(this.state.pieces, i, this.state.positions, false)
+        let moves = this.state.pieces[i].moves
         this.setState({active: i,
                        moves: moves,
                       drag: null})
@@ -173,8 +189,36 @@ export class Game extends Component {
 
     positions[peace[this.state.active].row-1][peace[this.state.active].column-1] = -1
     positions[row-1][column-1] = this.state.active
+
+    if (peace[this.state.active].name.includes('king')) {
+      if (peace[this.state.active].column - column > 1) {
+        let rook = positions[row-1][column-3]
+        console.log('rook', rook)
+        peace[rook].history = [[row, column+1]]
+        peace[rook].row = row
+        peace[rook].column = column + 1
+        positions[row-1][column] = rook
+        positions[row-1][column-3] = -1
+      }
+      else if (peace[this.state.active].column - column < -1) {
+        let rook = positions[row-1][column]
+        console.log('rook', rook)
+        peace[rook].history = [[row, column-1]]
+        peace[rook].row = row
+        peace[rook].column = column - 1
+        positions[row-1][column] = rook
+        positions[row-1][column] = -1
+      }
+    }
+
     peace[this.state.active].row = row
     peace[this.state.active].column = column
+    if (!peace[this.state.active].history) {
+      peace[this.state.active].history = [[row, column]]
+    }
+    else {
+      peace[this.state.active].history.push([row, column])
+    }
     if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
       peace[this.state.active].name = 'queen'
       peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
@@ -211,7 +255,12 @@ export class Game extends Component {
 
     peace[this.state.active].row = row + 1
     peace[this.state.active].column = column + 1
-
+    if (!peace[this.state.active].history) {
+      peace[this.state.active].history = [[row, column]]
+    }
+    else {
+      peace[this.state.active].history.push([row, column])
+    }
     console.log('killing ', peace[this.state.positions[row][column]].color, peace[this.state.positions[row][column]].name)
     gravy.push(peace[this.state.positions[row][column]])
     peace.splice(this.state.positions[row][column], 1)
@@ -225,14 +274,33 @@ export class Game extends Component {
     this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: [], last: last})
   }
 
-  create_pieces = () => {
+  test_check(peace, board, turn) {
+    let check = false
+    for (let i = 0; i < peace.length ; i++) {
+      if (peace[i].color !== turn) {
+        let moves = get_moves(peace, i, board, false)
+        if (moves.length > 0) {
+          for (let m = 0; m < moves.length; m++) {
+            let p = board[moves[m][0]-1][moves[m][1]-1]
+            if (p !== -1 && peace[p].name.includes('king')) {
+              check = true
+            }
+          }
+        }
+      }
+    }
+    return check
+  }
 
+  create_pieces = () => {
+    let check = null
     let population = [];
+    var check_board = this.state.positions.slice()
     const peace = this.state.pieces.slice()
+    var pizzas = this.state.pieces.slice()
     for (let i = 0; i < peace.length ; i++) {
       peace[i].moves = get_moves(peace, i, this.state.positions, false)
     }
-
 
     let offset = 0
     for (let i = 0; i < this.state.pieces.length ; i++) {
@@ -284,7 +352,7 @@ export class Game extends Component {
           this.state.rect.top+this.state.size    <= pos.y &&
           this.state.rect.bottom-this.state.size >= pos.y) {
             pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / parseFloat(this.state.size))
-            pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / parseFloat(this.state.size))
+            pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / parseFloat(this.state.size))
             pos.x = parseInt(pos.x)
             pos.y = parseInt(8 - pos.y - 1)
             if (this.state.positions[pos.y][pos.x] > -1) {
@@ -309,12 +377,13 @@ export class Game extends Component {
 
   highlight_square(e) {
     let pos = {x: e.clientX, y: e.clientY}
+    console.log(pos.y, this.state.rect.top, this.state.rect.bottom, this.state.offset)
     if (this.state.rect.left+this.state.size   <= pos.x &&
         this.state.rect.right-this.state.size  >= pos.x &&
         this.state.rect.top+this.state.size    <= pos.y &&
         this.state.rect.bottom-this.state.size >= pos.y) {
           pos.x = Math.floor((pos.x - this.state.rect.left - this.state.size) / parseFloat(this.state.size))
-          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size + this.state.offset) / parseFloat(this.state.size))
+          pos.y = Math.floor((pos.y - this.state.rect.top  - this.state.size) / parseFloat(this.state.size))
           pos.x = parseInt(pos.x)
           pos.y = parseInt(8 - pos.y - 1)
       this.setState({
@@ -329,19 +398,24 @@ export class Game extends Component {
     this.setSize()
   }
 
-  setSize() {
+  setSize(event) {
     let rect = ReactDOM.findDOMNode(this).getBoundingClientRect()
     let square = rect.width/10
+
     this.setState({
       size: square,
-      rect: rect
+      rect: rect,
     })
   }
 
   handleScroll(event) {
-    let top = event.srcElement.body.scrollTop
-    top = window.scrollY
+    let rect = ReactDOM.findDOMNode(this).getBoundingClientRect()
+    let square = rect.width/10
+    let top = Math.max(event.srcElement.body.scrollTop, window.scrollY)
+    console.log('    top', top)
     this.setState({
+      size: square,
+      rect: rect,
       offset: top
     })
   }
@@ -355,8 +429,6 @@ export class Game extends Component {
       let angle = 180*Math.atan2(dy, -dx)/Math.PI
       let x = ((this.state.size*(last[0][1]-0.5)))
       let y = ((this.state.size*(8.5-last[0][0])))
-      console.log("dy,dx,theta",-dy,dx,angle)
-      console.log("position")
       return (
         <div style={{position: "absolute",
                     top:  this.state.size,

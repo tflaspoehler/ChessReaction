@@ -64,7 +64,9 @@ export class Piece extends Component {
             name: this.props.peace.name,
             turn: this.props.turn,
             moves: [],
-            position: null,
+            history: [],
+            position: {row: this.props.peace.row, column: this.props.peace.column},
+            start_position: {row: this.props.peace.row, column: this.props.peace.column},
             dragging: false,
             offset: null,
             size: this.props.size
@@ -116,12 +118,14 @@ export class Piece extends Component {
     }
 
     mouseMove (e) {
-        let pos = {x: e.clientX - (this.state.offset.x), y: e.clientY - this.state.offset.y}
-        this.setState({
-            left: pos.x,
-            top: pos.y
-        })
-        this.props.onMove(e)
+        if (this.state.color === this.props.turn) {
+            let pos = {x: e.clientX - (this.state.offset.x), y: e.clientY - this.state.offset.y}
+            this.setState({
+                left: pos.x,
+                top: pos.y
+            })
+            this.props.onMove(e)
+        }
     }
     
     handleClick () {
@@ -139,6 +143,7 @@ export class Piece extends Component {
         }
         if (this.state.dragging) {
             return (
+            <div>
                 <div
                     style={{position: 'fixed',
                             top: this.state.top + 'px',
@@ -157,6 +162,23 @@ export class Piece extends Component {
                         alt={this.props.peace.name}
                     />
                 </div>
+                <div
+                    style={{position: 'absolute',
+                            top: this.props.top,
+                            left: this.props.left,
+                            width: this.props.size,
+                            height: this.props.size,
+                            backgroundColor: back,
+                            opacity: 0.4,
+                            }}
+                    id={this.props.peace.name} class="game_piece"                 >
+                    <img
+                        style={{cursor: 'grab'}}
+                        src={this.props.peace.image}
+                        alt={this.props.peace.name}
+                    />
+                </div>
+            </div>
             );
         }
         else {
