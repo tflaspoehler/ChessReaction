@@ -19,7 +19,8 @@ export class Square extends Component {
     }
   }
     
-  handleClick() {
+  handleClick(e) {
+    console.log('clicked a square')
     this.props.click(this.props.row, this.props.column)
   }
 

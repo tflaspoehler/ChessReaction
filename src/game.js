@@ -105,7 +105,7 @@ export class Game extends Component {
       rect: null,
       last: null,
       offset: window.scrollY,
-      check: null,
+      check: false,
 
     }
     this.active_piece = this.active_piece.bind(this);
@@ -113,7 +113,7 @@ export class Game extends Component {
     this.setSize = this.setSize.bind(this);
     this.handleScroll = this.handleScroll.bind(this);
     this.highlight_square = this.highlight_square.bind(this);
-    this.attack_piece = this.attack_piece.bind(this);
+    this.drop_piece = this.drop_piece.bind(this);
   }
 
 
@@ -133,57 +133,41 @@ export class Game extends Component {
         let moves = peace[this.state.active].moves
         for (let j=0; j < moves.length; j++) {
           if (moves[j][0] === peace[i].row && moves[j][1] === peace[i].column) {
-            let positions = this.state.positions.slice();
-            var last = []
-            last.push([peace[this.state.active].row, peace[this.state.active].column])
-            last.push([peace[i].row, peace[i].column])
-            peace[this.state.active].row = peace[i].row
-            peace[this.state.active].column = peace[i].column
-            if (!peace[this.state.active].history) {
-              peace[this.state.active].history = [[peace[i].row, peace[i].column]]
-            }
-            gravy.push(peace[i])
-            if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
-              peace[this.state.active].name = 'queen'
-              peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
-            }
-            peace.splice(i, 1)
-            for (let p = 0; p < 8; p++) {positions[p]=Array(8).fill(-1)}
-            for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
-            let turn = 'white'
-            if (this.state.turn === 'white') {turn = 'black'}            
-            this.setState({pieces: peace, positions: positions, active: -1, turn: turn, grave: gravy, moves: [], drag: null, last: last})
+            console.log('attempting to kill', peace[i].color, peace[i].name, 'with', peace[this.state.active].color, peace[this.state.active].name)
+            this.kill_piece(peace[i].row, peace[i].column)
             break;
           }
         }
       }
       else {
-        let moves = this.state.pieces[i].moves
-        this.setState({active: i,
-                       moves: moves,
-                      drag: null})
+        this.select_piece(i)
       }
     }
     else {
-      if (this.state.turn != peace[i].color) {
+      if (this.state.turn !== peace[i].color) {
         this.setState({active: -1,
                        moves: [],
                       drag: null})
       }
       else {
-        let moves = this.state.pieces[i].moves
-        this.setState({active: i,
-                       moves: moves,
-                      drag: null})
+        this.select_piece(i)
       }
     }
   }
 
+  select_piece(i) {
+    let moves = this.state.pieces[i].moves
+    this.setState({active: i,
+                    moves: moves,
+                  drag: null})    
+  }
+
   move_piece(row, column) {
     console.log('moving ', this.state.pieces[this.state.active].color, this.state.pieces[this.state.active].name)
-    const peace = this.state.pieces.slice();
-    const positions = this.state.positions.slice();
+    var peace = this.state.pieces.slice();
+    var positions = this.state.positions.slice();
     var last = []
+    var check = false
     last.push([peace[this.state.active].row, peace[this.state.active].column])
     last.push([row, column])
 
@@ -224,34 +208,40 @@ export class Game extends Component {
       peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
     }
 
-    let turn = this.next_turn() 
+    for (let p = 0; p < 8; p++) {positions[p]=Array(8).fill(-1)}
+    for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
 
-    this.setState({pieces: peace, positions: positions, active: -1, moves: [], turn: turn, last: last})
+    for (let i = 0; i < peace.length ; i++) {
+      peace[i].moves = get_moves(peace, i, this.state.positions, false)
+    }
+
+    check = this.test_check(JSON.parse(JSON.stringify(peace)), JSON.parse(JSON.stringify(positions)), turn)
+
+    let turn = this.next_turn()
+
+    peace = this.filter_discoveries(positions.slice(), peace.slice(), turn) 
+
+    this.setState({pieces: peace, positions: positions, active: -1, moves: [], turn: turn, last: last, check: check})
   }
 
-  next_turn () {
-    let turn = "white"
-    if (this.state.turn === "white") {
-      turn = "black"
-    }
-    return turn
-    }
 
   kill_piece(row, column) {
     var positions = this.state.positions
     var peace = this.state.pieces.slice()
     var last = []
+    var check =false
     if (this.state.grave.length > 0) {
       var gravy = this.state.grave.slice();
     }
     else {
       var gravy = [];
     }
-    row += -1
-    column += -1
 
     last.push([peace[this.state.active].row, peace[this.state.active].column])
     last.push([row, column])
+
+    row += -1
+    column += -1
 
     peace[this.state.active].row = row + 1
     peace[this.state.active].column = column + 1
@@ -265,14 +255,66 @@ export class Game extends Component {
     gravy.push(peace[this.state.positions[row][column]])
     peace.splice(this.state.positions[row][column], 1)
 
+    if (peace[this.state.active].name.includes('pawn') && (peace[this.state.active].row === 8 || peace[this.state.active].row === 1)) {
+      peace[this.state.active].name = 'queen'
+      peace[this.state.active].image = images[peace[this.state.active].color+ '_queen']
+    }
     for (let p = 0; p < 8; p++) {positions[p]=Array(8).fill(-1)}
     for (let p = 0; p < peace.length; p++) {positions[peace[p].row-1][peace[p].column-1] = p}
 
+    for (let i = 0; i < peace.length ; i++) {
+      peace[i].moves = get_moves(peace, i, this.state.positions, false)
+    }
+
+    check = this.test_check(JSON.parse(JSON.stringify(peace)), JSON.parse(JSON.stringify(positions)), turn)
+
     let turn = this.next_turn()
 
+    peace = this.filter_discoveries(positions.slice(), peace.slice(), turn)
 
-    this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: [], last: last})
+    this.setState({pieces: peace, positions: positions, grave: gravy, turn: turn, active: -1, moves: [], last: last, check: check})
   }
+
+
+  next_turn () {
+    let turn = "white"
+    if (this.state.turn === "white") {
+      turn = "black"
+    }
+    return turn
+    }
+
+  filter_discoveries(board, pieces, turn) { 
+    let mate = true
+    let check = false
+    var check_board = JSON.parse(JSON.stringify(board))
+    for (let i = 0; i < pieces.length; i++) {
+      if (pieces[i].color === turn && pieces[i].moves.length > 0) {
+        let m = 0 
+        while (m < pieces[i].moves.length) {
+          var pizzas = JSON.parse(JSON.stringify(pieces))
+          pizzas[i].row = pieces[i].moves[m][0]
+          pizzas[i].column = pieces[i].moves[m][1]
+          let p = check_board[pizzas[i].row-1][pizzas[i].column-1]
+          if (p !== -1) {
+            pizzas.splice(p, 1)
+          }
+          for (let slice = 0; slice < 8; slice++) {check_board[slice]=Array(8).fill(-1)}
+          for (let slice = 0; slice < pizzas.length; slice++) {check_board[pizzas[slice].row-1][pizzas[slice].column-1] = slice}
+          if (this.test_check(pizzas, check_board, turn)) {
+            pieces[i].moves.splice(m, 1)
+          }
+          else {
+            mate = false
+            m++
+          }
+        }
+      }
+    }
+    console.log('mate is ', mate)
+    return pieces
+  }
+  
 
   test_check(peace, board, turn) {
     let check = false
@@ -298,10 +340,7 @@ export class Game extends Component {
     var check_board = this.state.positions.slice()
     const peace = this.state.pieces.slice()
     var pizzas = this.state.pieces.slice()
-    for (let i = 0; i < peace.length ; i++) {
-      peace[i].moves = get_moves(peace, i, this.state.positions, false)
-    }
-
+    if (this.state.check) {console.log('CHECK')}
     let offset = 0
     for (let i = 0; i < this.state.pieces.length ; i++) {
       offset = 9 - this.state.pieces[i].row
@@ -312,7 +351,7 @@ export class Game extends Component {
                     peace={this.state.pieces[i]}
                     onDown={() => this.active_piece(i)}
                     onMove={this.highlight_square}
-                    onUp={this.attack_piece}
+                    onUp={this.drop_piece}
                     active={this.state.active}
                     turn={this.state.turn}
                     position='absolute'
@@ -326,7 +365,7 @@ export class Game extends Component {
   select_square(row, column) {
     row = row + 1
     column = column + 1
-    if (this.state.active > -1) {
+    if (this.state.active > -1 && this.state.active != this.state.positions[row-1][column-1]) {
       if (this.state.pieces[this.state.active].moves.length > 0) {
         for (let p = 0; p < this.state.pieces[this.state.active].moves.length; p++) {
           if (this.state.pieces[this.state.active].moves[p][0] === row && this.state.pieces[this.state.active].moves[p][1] === column) {
@@ -334,15 +373,17 @@ export class Game extends Component {
               this.kill_piece(row, column)
             }
             else {
+              console.log('moving piece from select_square')
               this.move_piece(row, column)
             }
+            break
           }
         }
       }
     }
   }
 
-  attack_piece(e) {
+  drop_piece(e) {
     let pos = {x: e.clientX, y: e.clientY}
     console.log('actual click positions', e.clientX, e.clientY)
     console.log('board rect', this.state.rect.left, this.state.rect.top)
@@ -365,6 +406,7 @@ export class Game extends Component {
               if (this.state.pieces[this.state.active].moves.length > 0) {
                 for (let m = 0; m < this.state.pieces[this.state.active].moves.length; m++) {
                   if (this.state.pieces[this.state.active].moves[m][0] === pos.y+1 && this.state.pieces[this.state.active].moves[m][1] === pos.x+1) {
+                    console.log('moving piece from drop_piece')
                     this.move_piece(pos.y+1, pos.x+1)
                     break
                   }
